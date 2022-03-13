@@ -275,6 +275,7 @@ static int f_absolute_path(lua_State *L) {
 
 
 static int f_get_file_info(lua_State *L) {
+  // 保证是 string
   const char *path = luaL_checkstring(L, 1);
 
   struct stat s;
@@ -285,6 +286,11 @@ static int f_get_file_info(lua_State *L) {
     return 2;
   }
 
+  // {
+  //   modified,
+  //   size,
+  //   type: file | dir
+  // }
   lua_newtable(L);
   lua_pushnumber(L, s.st_mtime);
   lua_setfield(L, -2, "modified");
@@ -380,6 +386,7 @@ static int f_fuzzy_match(lua_State *L) {
 
 
 static const luaL_Reg lib[] = {
+  // 注入之后，lua 可以通过 system.func 的方式来调用函数
   { "poll_event",          f_poll_event          },
   { "wait_event",          f_wait_event          },
   { "set_cursor",          f_set_cursor          },

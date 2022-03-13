@@ -12,6 +12,7 @@ static const luaL_Reg libs[] = {
 };
 
 void api_load_libs(lua_State *L) {
+  // 注入调用库
   for (int i = 0; libs[i].name; i++) {
     luaL_requiref(L, libs[i].name, libs[i].func, 1);
   }

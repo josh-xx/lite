@@ -112,6 +112,7 @@ int main(int argc, char **argv) {
   // 初始化 lua
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
+  // 注入 lua 方法
   api_load_libs(L);
 
   // ARGS = argv

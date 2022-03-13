@@ -23,6 +23,7 @@ local function project_scan_thread()
     end
   end
 
+  -- 这个函数只是用来排序的
   local function compare_file(a, b)
     return a.filename < b.filename
   end
@@ -74,6 +75,7 @@ local function project_scan_thread()
 end
 
 
+-- core.init 是 lua 的执行入口
 function core.init()
   command = require "core.command"
   keymap = require "core.keymap"
@@ -82,8 +84,18 @@ function core.init()
   CommandView = require "core.commandview"
   Doc = require "core.doc"
 
+  -- 脚本文件和可执行文件应该在同一个目录下
   local project_dir = EXEDIR
   local files = {}
+
+  -- argv 中有要打开的文件和目录信息 
+  -- lite test.txt ./data
+
+  -- #ARGS 是 c 中输入进来的
+  -- 从 2 开始读，跳过可执行文件名
+  -- 从 argv 中读取信息
+  -- 如果是 file，那么把文件的绝对路径插入 files 中
+  -- 如果是 dir，那么把工作目录改为 dir
   for i = 2, #ARGS do
     local info = system.get_file_info(ARGS[i]) or {}
     if info.type == "file" then
@@ -95,6 +107,9 @@ function core.init()
 
   system.chdir(project_dir)
 
+
+  -- 上面 local core = {} 定义的
+  -- 下面东西干啥的不清楚
   core.frame_start = 0
   core.clip_rect_stack = {{ 0,0,0,0 }}
   core.log_items = {}
@@ -110,7 +125,13 @@ function core.init()
   core.root_view.root_node:split("down", core.command_view, true)
   core.root_view.root_node.b:split("down", core.status_view, true)
 
+  -- 异步执行 project_scan_thread
+  -- project_scan_thread 会去扫当前工作目录 "." 里的东西
+  -- 上面默认会取当前可执行文件的目录
+  -- 如果 argv 里有目录，会把该目录作为工作目录
+  -- project_scan_thread 会隔一段时间执行自己，轮询工作目录里的文件变化
   core.add_thread(project_scan_thread)
+  -- 运行 core.command.add_defaults，这个函数会载入 core.commands.* 下面的东西
   command.add_defaults()
   local got_plugin_error = not core.load_plugins()
   local got_user_error = not core.try(require, "user")
@@ -173,7 +194,7 @@ end
 
 
 function core.load_plugins()
-  local no_errors = true
+local no_errors = true
   local files = system.list_dir(EXEDIR .. "/data/plugins")
   for _, filename in ipairs(files) do
     local modname = "plugins." .. filename:gsub(".lua$", "")
@@ -223,8 +244,12 @@ end
 
 
 function core.add_thread(f, weak_ref)
+  -- 异步执行
+  -- 这里是用 lua 的协程
+  -- weak_ref 不懂
   local key = weak_ref or #core.threads + 1
   local fn = function() return core.try(f) end
+  -- 把要执行的函数做成一个协程，放入 core.threads 中
   core.threads[key] = { cr = coroutine.create(fn), wake = 0 }
 end
 
