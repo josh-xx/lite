@@ -59,7 +59,11 @@ static const char* utf8_to_codepoint(const char *p, unsigned *dst) {
 void ren_init(SDL_Window *win) {
   assert(win);
   window = win;
+  // https://blog.csdn.net/ashlingr/article/details/7910228
+  // 所有需要输出到屏幕上的画面都需要写到 surface 里
   SDL_Surface *surf = SDL_GetWindowSurface(window);
+  // 把 surface 的宽高 xy 复制到全局变量 clip 里去
+  // clip 的作用暂时不清楚
   ren_set_clip_rect( (RenRect) { 0, 0, surf->w, surf->h } );
 }
 
