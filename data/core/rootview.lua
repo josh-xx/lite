@@ -79,8 +79,11 @@ function Node:on_mouse_released(...)
 end
 
 
+-- 这个函数的使用不太清楚
 function Node:consume(node)
+  -- 把当前的对象的键值全部设空
   for k, _ in pairs(self) do self[k] = nil end
+  -- 把当前的对象的键值全部设成 node 的
   for k, v in pairs(node) do self[k] = v   end
 end
 
@@ -88,19 +91,35 @@ end
 local type_map = { up="vsplit", down="vsplit", left="hsplit", right="hsplit" }
 
 function Node:split(dir, view, locked)
+  -- 只能 split 叶子结点
   assert(self.type == "leaf", "Tried to split non-leaf node")
+  -- 根据传入的 dir 决定 type
   local type = assert(type_map[dir], "Invalid direction")
+  -- 当前 active 的 view
   local last_active = core.active_view
+  -- 新建一个 node，叫 child
   local child = Node()
+  -- 等于是 child = self.clone()
   child:consume(self)
+  -- self = Node(type).clone()
   self:consume(Node(type))
+  -- 新建一个新结点，把当前的结点放到 .a，把 .b 结点放到 Node()
+  -- 把 self 变成一个分割结点，a 是之前的自己（child），b 是包含 view 的新 node
+  -- 如果方向不对，就交换一下，返回之前的自己（child）
+  -- down 把 view 放到下面
+  -- up 把 view 放到上面
+  -- right 把 view 放到右边
+  -- left 把 view 放到左边
+  -- v -> new_view_node(a: v, b: view)
   self.a = child
   self.b = Node()
+  -- 添加一个 view
   if view then self.b:add_view(view) end
   if locked then
     self.b.locked = locked
     core.set_active_view(last_active)
   end
+  -- 处理方向，如果是这两种方向，就交换一下 a b
   if dir == "up" or dir == "left" then
     self.a, self.b = self.b, self.a
   end
@@ -377,6 +396,7 @@ end
 
 
 
+-- 继承 View
 local RootView = View:extend()
 
 function RootView:new()

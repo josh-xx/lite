@@ -8,15 +8,21 @@ local always_true = function() return true end
 
 function command.add(predicate, map)
   predicate = predicate or always_true
+  -- 如果是 string，那么 require 指定的文件
   if type(predicate) == "string" then
     predicate = require(predicate)
   end
+  -- 这个 table 类型不太清楚
   if type(predicate) == "table" then
     local class = predicate
     predicate = function() return core.active_view:is(class) end
   end
+
+  -- predicate 到这里都会是一个函数
   for name, fn in pairs(map) do
+    -- 确认 command 没有被添加过
     assert(not command.map[name], "command already exists: " .. name)
+    -- 放到 command.map 中
     command.map[name] = { predicate = predicate, perform = fn }
   end
 end
@@ -59,6 +65,8 @@ end
 
 
 function command.add_defaults()
+  -- 载入默认的命令
+  -- reg 里的就是 commands.* 里的命令，也就是默认的命令
   local reg = { "core", "root", "command", "doc", "findreplace" }
   for _, name in ipairs(reg) do
     require("core.commands." .. name)

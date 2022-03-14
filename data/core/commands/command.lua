@@ -3,6 +3,7 @@ local command = require "core.command"
 local CommandView = require "core.commandview"
 
 local function has_commandview()
+  -- 判断命令试图有没有弹出
   return core.active_view:is(CommandView)
 end
 

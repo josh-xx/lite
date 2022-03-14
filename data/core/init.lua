@@ -132,12 +132,17 @@ function core.init()
   -- project_scan_thread 会隔一段时间执行自己，轮询工作目录里的文件变化
   core.add_thread(project_scan_thread)
   -- 运行 core.command.add_defaults，这个函数会载入 core.commands.* 下面的东西
+  -- 所有的操作都是命令，这样好
   command.add_defaults()
+  -- 载入插件
   local got_plugin_error = not core.load_plugins()
+  -- 载入用户配置
   local got_user_error = not core.try(require, "user")
+  -- 载入目录里的 .lite_project.lua 文件里的函数
   local got_project_error = not core.load_project_module()
 
   for _, filename in ipairs(files) do
+    -- 遍历 argv 里的文件
     core.root_view:open_doc(core.open_doc(filename))
   end
 
@@ -211,6 +216,7 @@ end
 
 function core.load_project_module()
   local filename = ".lite_project.lua"
+  -- 如果文件存在，那么就加载文件夹下的 .lite_project.lua 文件
   if system.get_file_info(filename) then
     return core.try(function()
       local fn, err = loadfile(filename)
@@ -284,6 +290,7 @@ function core.open_doc(filename)
     end
   end
   -- no existing doc for filename; create new
+  -- 新建新的 doc
   local doc = Doc(filename)
   table.insert(core.docs, doc)
   core.log_quiet(filename and "Opened doc \"%s\"" or "Opened new doc", filename)
