@@ -143,9 +143,11 @@ function core.init()
 
   for _, filename in ipairs(files) do
     -- 遍历 argv 里的文件
+    -- 打开文件
     core.root_view:open_doc(core.open_doc(filename))
   end
 
+  -- 如果有问题，那么就打开 logview
   if got_plugin_error or got_user_error or got_project_error then
     command.perform("core:open-log")
   end

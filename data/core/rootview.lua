@@ -413,17 +413,21 @@ end
 
 
 function RootView:get_active_node()
+  -- 找到 root_node 下 core.active_view 对应的 node
   return self.root_node:get_node_for_view(core.active_view)
 end
 
 
 function RootView:open_doc(doc)
+  -- 找到当前 core.active_view 的 node
+  -- 找到 node 是为了要在这个 node 下打开新的 doc view
   local node = self:get_active_node()
   if node.locked and core.last_active_view then
     core.set_active_view(core.last_active_view)
     node = self:get_active_node()
   end
   assert(not node.locked, "Cannot open doc on locked node")
+  -- 如果 doc 已经在 active node 下打开，就直接 active
   for i, view in ipairs(node.views) do
     if view.doc == doc then
       node:set_active_view(node.views[i])
