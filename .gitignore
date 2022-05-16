@@ -6,3 +6,13 @@ lua/src/*.a
 lua/src/lua
 lua/src/luac
 lite.dSYM
+/.cmake/
+/.ninja_deps
+/.ninja_log
+CMakeCache.txt
+/CMakeFiles
+/.idea/
+/cmake-build-debug/
+/Testing/Temporary/
+/build.ninja
+/cmake_install.cmake
